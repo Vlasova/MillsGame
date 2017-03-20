@@ -1,10 +1,10 @@
 package ru.vlasova.mills.core;
 
 public class Piece {
-    private String color;
+    private int color;
     private PieceStatus status;
 
-    public Piece(String color) {
+    public Piece(int color) {
         this.color = color;
         this.status = PieceStatus.NEW;
     }
@@ -17,7 +17,7 @@ public class Piece {
         return status;
     }
 
-    public String getColor() {
+    public int getColor() {
         return color;
     }
 }

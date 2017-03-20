@@ -7,7 +7,7 @@ import ru.vlasova.mills.core.PieceStatus;
 
 public class PieceTest {
 
-    Piece piece = new Piece("white");
+    Piece piece = new Piece(1);
 
     @Test
     public void testGetStatus() {
@@ -22,6 +22,6 @@ public class PieceTest {
 
     @Test
     public void testGetColor() {
-        assertEquals("white", piece.getColor());
+        assertEquals(1, piece.getColor());
     }
 }
