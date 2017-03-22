@@ -22,6 +22,10 @@ public class Cell {
     }
 
     public Piece getPiece() {
+        return piece;
+    }
+
+    public Piece removePiece() {
         status = CellStatus.EMPTY;
         return piece;
     }
