@@ -20,7 +20,7 @@ public class BoardTest{
     @Test
     public void testMoveOneCoord() {
         board.setPiece(0, 2, 1, 0 );
-        board.moveOneCoord(2, 1, 0, 1, 1, 0);
+        board.moveOneCoord(0, 2, 1, 0, 1, 1, 0);
         assertEquals(CellStatus.OCCUPIED, board.getCells()[1][1][0].getStatus());
         assertEquals(0, board.getCells()[1][1][0].getPiece().getColor());
         assertEquals(CellStatus.EMPTY, board.getCells()[2][1][0].getStatus());

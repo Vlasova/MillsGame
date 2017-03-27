@@ -21,8 +21,11 @@ public class Cell {
         status = CellStatus.OCCUPIED;
     }
 
-    public Piece getPiece() {
-        return piece;
+    public Piece getPiece() throws RuntimeException {
+        if(status ==CellStatus.OCCUPIED)
+            return piece;
+        else
+            throw new RuntimeException("cell is empty");
     }
 
     public Piece removePiece() {

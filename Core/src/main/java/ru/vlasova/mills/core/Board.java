@@ -27,15 +27,19 @@ public class Board {
         cells[x][y][z].setPiece(new Piece(color));
     }
 
-    public void moveOneCoord(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) throws RuntimeException{
+    public void moveOneCoord(int color, int fromX, int fromY, int fromZ, int toX, int toY, int toZ) throws RuntimeException{
         if(Math.abs(fromX - toX) > 1 || Math.abs(fromY - toY) > 1 || Math.abs(fromZ - toZ) > 1)
             throw new RuntimeException("the move is impossible");
         if(cells[toX][toY][toZ].getStatus().equals(CellStatus.OCCUPIED))
             throw new RuntimeException("the cell is occupied");
+        if(cells[fromX][fromY][fromZ].getPiece().getColor() != color)
+            throw new RuntimeException("you can`t move opponent`s piece");
         cells[toX][toY][toZ].setPiece(cells[fromX][fromY][fromZ].removePiece());
     }
 
-    public void moveAnyCoord(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) throws RuntimeException{
+    public void moveAnyCoord(int color, int fromX, int fromY, int fromZ, int toX, int toY, int toZ) throws RuntimeException{
+        if(cells[fromX][fromY][fromZ].getPiece().getColor() != color)
+            throw new RuntimeException("you can`t move opponent`s piece");
         if(cells[toX][toY][toZ].getStatus().equals(CellStatus.EMPTY))
             cells[toX][toY][toZ].setPiece(cells[fromX][fromY][fromZ].getPiece());
         else
@@ -70,7 +74,10 @@ public class Board {
         return false;
     }
 
-    public void removePiece(int x, int y, int z) {
-        cells[x][y][z].removePiece();
+    public void removePiece(int color, int x, int y, int z) throws RuntimeException {
+        if(cells[x][y][z].getPiece().getColor() != color)
+            cells[x][y][z].removePiece();
+        else
+            throw new RuntimeException("you can remove only opponent`s piece");
     }
 }
