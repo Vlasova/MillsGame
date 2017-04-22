@@ -1,40 +1,36 @@
 package ru.vlasova.mills.core;
 
+import java.util.ArrayList;
+
 public class Player {
     private PlayerStatus status;
     private int color;
-    private Board board;
+    private ArrayList<Piece> pieces;
 
-    public Player(int color, Board board) {
+    public Player(int color) {
         status = PlayerStatus.INITIAL;
         this.color = color;
-        this.board = board;
+        pieces = new ArrayList<>();
     }
 
     public void setStatus(PlayerStatus status) {
         this.status = status;
     }
 
-    public void setPiece(int x, int y, int z) {
-        board.setPiece(color, x, y, z);
+    public void setPiece(Piece piece) throws RuntimeException{
+        if(!status.equals(PlayerStatus.INITIAL))
+            throw new RuntimeException("All pieces are placed");
+        pieces.add(piece);
+        if(pieces.size()==9)
+            status = PlayerStatus.BASIC;
     }
 
-    public void makeMove(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) throws RuntimeException{
-        try {
-            if (status == PlayerStatus.BASIC)
-                board.moveOneCoord(color, fromX, fromY, fromZ, toX, toY, toZ);
-            if (status == PlayerStatus.FINAL)
-                board.moveAnyCoord(color, fromX, fromY, fromZ, toX, toY, toZ);
-        } catch (RuntimeException e) {
-            throw e;
-        }
+    public int getColor() {
+        return color;
     }
 
-    public void removePiece(int x, int y, int z) throws RuntimeException{
-        try {
-            board.removePiece(color, x, y, z);
-        } catch ( RuntimeException e) {
-            throw e;
-        }
+    public PlayerStatus getStatus() {
+        return status;
     }
+
 }

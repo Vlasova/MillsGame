@@ -23,8 +23,12 @@ public class Board {
         return cells;
     }
 
-    public void setPiece(int color, int x, int y, int z) {
-        cells[x][y][z].setPiece(new Piece(color));
+    public void setPiece(Player player, int x, int y, int z) throws RuntimeException{
+        if(cells[x][y][z].getStatus().equals(CellStatus.OCCUPIED))
+            throw new RuntimeException("Cell is occupied");
+        Piece piece = new Piece(player.getColor(), x, y, z);
+        player.setPiece(piece);
+        cells[x][y][z].setPiece(piece);
     }
 
     public void moveOneCoord(int color, int fromX, int fromY, int fromZ, int toX, int toY, int toZ) throws RuntimeException{
@@ -79,5 +83,9 @@ public class Board {
             cells[x][y][z].removePiece();
         else
             throw new RuntimeException("you can remove only opponent`s piece");
+    }
+
+    public Piece getPiece(int x, int y, int z) {
+        return cells[x][y][z].getPiece();
     }
 }
