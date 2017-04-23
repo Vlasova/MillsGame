@@ -20,12 +20,16 @@ public class Game implements MillsAPI {
     }
 
     @Override
-    public void makeMove(Player player, int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {
-
+    public void makeMove(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {
+        if(activePlayer.getStatus().equals(PlayerStatus.BASIC))
+            board.moveOneCoord(activePlayer.getColor(), fromX, fromY, fromZ, toX, toY, toZ);
+        if(activePlayer.getStatus().equals(PlayerStatus.FINAL))
+            board.moveAnyCoord(activePlayer.getColor(), fromX, fromY, fromZ, toX, toY, toZ);
+        changeActivePlayer();
     }
 
     @Override
-    public void removePiece(Player player, int x, int y, int z) {
+    public void removePiece(int x, int y, int z) {
 
     }
 
@@ -35,8 +39,8 @@ public class Game implements MillsAPI {
     }
 
     @Override
-    public boolean isMill(Player player) {
-        if(board.isMill(player.getColor()))
+    public boolean isMill() {
+        if(board.isMill(activePlayer.getColor()))
             return true;
         else
             return false;
@@ -47,5 +51,13 @@ public class Game implements MillsAPI {
             activePlayer = blackPlayer;
         else
             activePlayer = whitePlayer;
+    }
+
+    @Override
+    public boolean isAllPiecesSet() {
+        if(whitePlayer.getStatus().equals(PlayerStatus.BASIC) && blackPlayer.getStatus().equals(PlayerStatus.BASIC))
+            return true;
+        else
+            return false;
     }
 }
