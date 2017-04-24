@@ -33,4 +33,14 @@ public class Player {
         return status;
     }
 
+    public void removePiece(Piece piece) {
+        for(Piece p : pieces)
+            if(p.equals(piece))
+                pieces.remove(piece);
+    }
+
+    public int getNumberOfPieces() {
+        return pieces.size();
+    }
+
 }

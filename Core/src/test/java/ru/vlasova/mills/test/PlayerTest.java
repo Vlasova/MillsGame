@@ -9,7 +9,7 @@ import ru.vlasova.mills.core.PlayerStatus;
 
 import static org.junit.Assert.*;
 
-/**public class PlayerTest {
+public class PlayerTest {
     Board board = new Board();
     Player player1= new Player(0);
     Player player2 = new Player(1);
@@ -35,13 +35,4 @@ import static org.junit.Assert.*;
         //player1.makeMove(1, 0, 0, 1, 0, 1);
         //assertEquals(0, board.getCells()[1][0][1].getPiece().getColor());
     }
-
-    @Test
-    public void testRemovePiece() {
-        player1.setPiece(whitePiece);
-        player2.setPiece(blackPiece);
-        //player1.removePiece(0, 1, 1);
-        //player2.removePiece(0, 0, 0);
-        //assertEquals(CellStatus.EMPTY, board.getCells()[0][0][0].getStatus());
-    }
-}*/
+}

@@ -78,11 +78,10 @@ public class Board {
         return false;
     }
 
-    public void removePiece(int color, int x, int y, int z) throws RuntimeException {
-        if(cells[x][y][z].getPiece().getColor() != color)
-            cells[x][y][z].removePiece();
-        else
+    public Piece removePiece(int color, int x, int y, int z) throws RuntimeException {
+        if(cells[x][y][z].getPiece().getColor() == color)
             throw new RuntimeException("you can remove only opponent`s piece");
+        return cells[x][y][z].removePiece();
     }
 
     public Piece getPiece(int x, int y, int z) {

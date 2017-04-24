@@ -16,7 +16,8 @@ public class Game implements MillsAPI {
     @Override
     public void makeMove(int x, int y, int z) throws RuntimeException{
         board.setPiece(activePlayer, x, y, z);
-        changeActivePlayer();
+        if(!isMill())
+            changeActivePlayer();
     }
 
     @Override
@@ -30,7 +31,9 @@ public class Game implements MillsAPI {
 
     @Override
     public void removePiece(int x, int y, int z) {
-
+        Piece piece = board.removePiece(activePlayer.getColor(), x, y, z);
+        activePlayer.removePiece(piece);
+        changeActivePlayer();
     }
 
     @Override
