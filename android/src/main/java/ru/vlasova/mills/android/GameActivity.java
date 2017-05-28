@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -29,12 +31,13 @@ public class GameActivity extends Activity {
 
     class GameView extends View {
         private Bitmap fieldBitmap;
-        private Bitmap whiteFigure;
-        private Bitmap blackFigure;
+        private Figure[] whiteFigures;
+        private Figure[] blackFigures;
         private Paint paint;
         private Point point;
         private Game game;
         private int cellSize;
+        boolean afterRemove;
 
         GameView(Context context) {
             super(context);
@@ -47,9 +50,15 @@ public class GameActivity extends Activity {
 
             paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
-            x = (int) fieldBitmap.getHeight()/10;
-            whiteFigure = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.white), x, x, false);
-            blackFigure = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.black), x, x, false);
+            whiteFigures = new Figure[9];
+            blackFigures = new Figure[9];
+            int size = fieldBitmap.getHeight()/9;
+            x = (point.x - fieldBitmap.getWidth())/2;
+            int y = (point.y - fieldBitmap.getWidth())/2;
+            for (int i=0; i<9; i++) {
+                whiteFigures[i] = new Figure(0, x+i*size, y-size, size);
+                blackFigures[i] = new Figure(1, x+i*size, y+fieldBitmap.getHeight(), size);
+            }
 
             game = new Game();
 
@@ -62,6 +71,20 @@ public class GameActivity extends Activity {
             canvas.drawBitmap(fieldBitmap, x, y, paint);
             Canvas fieldCanvas = new Canvas(fieldBitmap);
             drawField(fieldCanvas);
+            if (afterRemove) {
+                fieldCanvas.drawColor(Color.WHITE);
+                fieldCanvas.drawBitmap(fieldBitmap, 0, 0, paint);
+                drawField(fieldCanvas);
+                afterRemove = false;
+            }
+            for (Figure figure : whiteFigures) {
+                if (figure.getStatus() == 0)
+                    figure.draw(canvas);
+            }
+            for (Figure figure : blackFigures) {
+                if (figure.getStatus() == 0)
+                    figure.draw(canvas);
+            }
         }
 
         public boolean onTouchEvent(MotionEvent event) {
@@ -71,11 +94,13 @@ public class GameActivity extends Activity {
             Point coordXY = calculateXY(eventX, eventY, z);
             int x = coordXY.x;
             int y = coordXY.y;
-            if(game.isMill()) {
+            /**if(game.isMill() && x !=-1 && y != -1 && z != -1) {
                 game.removePiece(x, y, z);
+                deleteFigure(x, y, z, game.getActivePlayer());
+                afterRemove = true;
                 invalidate();
-            }
-            else if(!game.isAllPiecesSet() && x != -1 && y != -1 && z != -1) {
+            }*/
+            if(!game.isAllPiecesSet() && x != -1 && y != -1 && z != -1) {
                 game.makeMove(x, y, z);
                 invalidate();
             }
@@ -83,34 +108,72 @@ public class GameActivity extends Activity {
         }
 
         public void drawField(Canvas canvas) {
-
+            int x, y, color;
             Cell[][][] cells = game.getField();
             for(int i=0; i<3; i++)
                 for(int j=0; j<3; j++)
                     for(int k=0; k<3; k++)
                         if(cells[i][j][k].getStatus().equals(CellStatus.OCCUPIED)) {
-                            drawFigure(canvas, i, j, k, cells[i][j][k].getPiece().getColor());
+                            x = calculateCoordAfterMove(i, k);
+                            y = calculateCoordAfterMove(j, k);
+                            color = cells[i][j][k].getPiece().getColor();
+                            if (!game.isAllPiecesSet() && findFigure(x, y, color) == null)
+                                drawFigure(canvas, x, y, color);
                         }
         }
 
-        private void drawFigure(Canvas canvas, int x, int y, int z, int color) {
-            int coordX = calculateCoordAfterMove(x, z);
-            int coordY = calculateCoordAfterMove(y, z);
-            if(color == 0) {
-                canvas.drawBitmap(whiteFigure, coordX, coordY, paint);
+        private Figure findFigure(int x, int y, int color) {
+            if (color == 0) {
+                for (Figure figure : whiteFigures) {
+                    if (figure.checkCoords(x, y))
+                        return figure;
+                }
             }
             else {
-                canvas.drawBitmap(blackFigure, coordX, coordY, paint);
+                for (Figure figure : blackFigures) {
+                    if (figure.checkCoords(x, y))
+                        return figure;
+                }
             }
+            return null;
+        }
+
+        private void drawFigure(Canvas canvas, int x, int y, int color) {
+            if (color == 0) {
+                for (Figure figure : whiteFigures) {
+                    if (figure.getStatus() == 0) {
+                        if (drawFigure(figure, canvas, x, y))
+                            break;
+                    }
+                }
+            }
+            else {
+                for (Figure figure : blackFigures) {
+                    if (figure.getStatus() == 0) {
+                        if (drawFigure(figure, canvas, x, y))
+                            break;
+                    }
+                }
+            }
+        }
+
+        private boolean drawFigure(Figure figure, Canvas canvas, int x, int y) {
+            if (figure.getStatus() == 0) {
+                figure.setCoords(x, y);
+                figure.setStatus(1);
+                figure.draw(canvas);
+                return true;
+            }
+            return false;
         }
 
         private int calculateCoordAfterMove(int coord, int z) {
             int trueCoord;
-            int figureSize = whiteFigure.getHeight();
+            int figureSize = whiteFigures[0].getBitmap().getHeight();
             if(coord==0)
                 trueCoord = cellSize*(2*z+1)-figureSize/2;
             else if(coord==1)
-               trueCoord = cellSize*7-figureSize/2;
+                trueCoord = cellSize*7-figureSize/2;
             else
                 trueCoord = cellSize*(13-2*z)-figureSize/2;
             return trueCoord;
@@ -161,6 +224,74 @@ public class GameActivity extends Activity {
             else
                 z = -1;
             return z;
+        }
+
+        public void deleteFigure(int x, int y, int z,int color) {
+            x = calculateCoordAfterMove(x, z);
+            y = calculateCoordAfterMove(y, z);
+            if (color == 0) {
+                for (Figure figure : whiteFigures) {
+                    if (figure.checkCoords(x, y))
+                        figure.delete();
+                    break;
+                }
+            }
+            else {
+                for (Figure figure : blackFigures) {
+                    if (figure.checkCoords(x, y))
+                        figure.delete();
+                    break;
+                }
+            }
+        }
+    }
+
+    class Figure {
+        private int x;
+        private int y;
+        private int color;
+        private Bitmap bitmap;
+        private int status;
+
+        Figure(int color, int x, int y, int size) {
+            this.color = color;
+            this.x = x;
+            this.y = y;
+            this.status = 0;
+            if (color == 0)
+                this.bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.white), size, size, false);
+            else
+                this.bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.black), size, size, false);
+        }
+
+        public void setCoords(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public Bitmap getBitmap() {
+            return bitmap;
+        }
+
+        public boolean checkCoords(int x, int y) {
+            return this.x == x && this.y == y;
+        }
+
+        public void draw(Canvas canvas){
+            canvas.drawBitmap(bitmap, x, y, null);
+        }
+
+        public int getStatus() {
+            return status;
+        }
+
+        public void setStatus(int status) {
+            this.status = status;
+        }
+
+        public void delete() {
+            bitmap.recycle();
+            bitmap = null;
         }
     }
 }

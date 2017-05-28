@@ -1,15 +1,18 @@
 package ru.vlasova.mills.core;
 
 public class Piece {
-    private int color;
-    private PieceStatus status;
-    private int x;
-    private int y;
-    private int z;
+    int color;
+    PieceStatus status;
+    int x;
+    int y;
+    int z;
 
     public Piece(int color, int x, int y, int z) {
         this.color = color;
         this.status = PieceStatus.NEW;
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
 
     public void setStatus(PieceStatus status) {
@@ -22,5 +25,11 @@ public class Piece {
 
     public int getColor() {
         return color;
+    }
+
+    public void setCoord(int x, int y, int z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
 }

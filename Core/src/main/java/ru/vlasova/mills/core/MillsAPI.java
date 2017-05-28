@@ -7,4 +7,5 @@ public interface MillsAPI {
     Cell[][][] getField();
     boolean isMill();
     boolean isAllPiecesSet();
+    int getActivePlayer();
 }

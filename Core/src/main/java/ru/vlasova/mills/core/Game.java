@@ -63,4 +63,9 @@ public class Game implements MillsAPI {
         else
             return false;
     }
+
+    @Override
+    public int getActivePlayer() {
+        return activePlayer.getColor();
+    }
 }
