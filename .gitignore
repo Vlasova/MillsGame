@@ -1,6 +1,7 @@
 .gradle
 .idea
 build
+Core/build
 out
 *.iml
-projectFilesBackup
+
