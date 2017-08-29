@@ -3,9 +3,15 @@ package ru.vlasova.mills.core;
 public class Cell {
     private CellStatus status;
     private Piece piece;
+    private int x;
+    private int y;
+    private int z;
 
-    public Cell() {
+    public Cell(int x, int y, int z) {
         this.status = CellStatus.EMPTY;
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
 
     public void setStatus(CellStatus status) {
@@ -31,5 +37,17 @@ public class Cell {
     public Piece removePiece() {
         status = CellStatus.EMPTY;
         return piece;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public int getZ() {
+        return z;
     }
 }

@@ -6,11 +6,17 @@ public class Player {
     private PlayerStatus status;
     private int color;
     private ArrayList<Piece> pieces;
+    private ArrayList<Cell[]> mills;
 
     public Player(int color) {
         status = PlayerStatus.INITIAL;
         this.color = color;
         pieces = new ArrayList<>();
+        mills = new ArrayList<>();
+    }
+
+    public void addMill(Cell[] cells) {
+        mills.add(cells);
     }
 
     public void setStatus(PlayerStatus status) {
@@ -41,6 +47,10 @@ public class Player {
 
     public int getNumberOfPieces() {
         return pieces.size();
+    }
+
+    public ArrayList<Cell[]> getMills() {
+        return mills;
     }
 
 }

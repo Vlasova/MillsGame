@@ -43,7 +43,7 @@ public class Game implements MillsAPI {
 
     @Override
     public boolean isMill() {
-        if(board.isMill(activePlayer.getColor()))
+        if(board.isMill(activePlayer))
             return true;
         else
             return false;
