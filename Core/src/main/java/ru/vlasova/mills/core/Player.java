@@ -7,6 +7,7 @@ public class Player {
     private int color;
     private ArrayList<Piece> pieces;
     private ArrayList<Cell[]> mills;
+    private int countOfUsedMills = 0;
 
     public Player(int color) {
         status = PlayerStatus.INITIAL;
@@ -45,12 +46,20 @@ public class Player {
                 pieces.remove(piece);
     }
 
-    public int getNumberOfPieces() {
-        return pieces.size();
+    public void returnMill() {
+        countOfUsedMills--;
     }
 
     public ArrayList<Cell[]> getMills() {
         return mills;
     }
 
+    public boolean isNewMill() {
+        if (mills.size()>countOfUsedMills) {
+            countOfUsedMills++;
+            return true;
+        }
+        else
+            return false;
+    }
 }

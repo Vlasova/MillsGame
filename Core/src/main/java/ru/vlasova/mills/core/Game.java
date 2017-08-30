@@ -14,10 +14,17 @@ public class Game implements MillsAPI {
     }
 
     @Override
-    public void makeMove(int x, int y, int z) throws RuntimeException{
-        board.setPiece(activePlayer, x, y, z);
-        if(!isMill())
-            changeActivePlayer();
+    public boolean makeMove(int x, int y, int z) throws RuntimeException{
+        if (activePlayer.isNewMill()) {
+            removePiece(x, y, z);
+            return false;
+        }
+        else if (!board.isMill(activePlayer)) {
+            board.setPiece(activePlayer, x, y, z);
+            if (!board.isMill(activePlayer))
+                changeActivePlayer();
+        }
+        return true;
     }
 
     @Override
@@ -31,9 +38,13 @@ public class Game implements MillsAPI {
 
     @Override
     public void removePiece(int x, int y, int z) {
-        Piece piece = board.removePiece(activePlayer.getColor(), x, y, z);
-        activePlayer.removePiece(piece);
-        changeActivePlayer();
+        try {
+            Piece piece = board.removePiece(activePlayer.getColor(), x, y, z);
+            activePlayer.removePiece(piece);
+            changeActivePlayer();
+        } catch (RuntimeException e) {
+            activePlayer.returnMill();
+        }
     }
 
     @Override
@@ -41,13 +52,13 @@ public class Game implements MillsAPI {
         return board.getCells();
     }
 
-    @Override
+    /**@Override
     public boolean isMill() {
         if(board.isMill(activePlayer))
             return true;
         else
             return false;
-    }
+    }*/
 
     private void changeActivePlayer() {
         if(activePlayer == whitePlayer)

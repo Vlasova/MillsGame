@@ -33,6 +33,7 @@ public class GameActivity extends Activity {
 
     class GameView extends View {
         private Bitmap fieldBitmap;
+        private Bitmap background;
         private Figure[] whiteFigures;
         private Figure[] blackFigures;
         private Paint paint;
@@ -51,6 +52,7 @@ public class GameActivity extends Activity {
             display.getSize(point);
             int x = (int) (point.x * 0.9);
             fieldBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.field), x, x, false);
+            background = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.background), point.x, point.y, false);
             paint = new Paint(Paint.ANTI_ALIAS_FLAG);
             fieldCoords = new Point();
             cellSize = fieldBitmap.getHeight()/14;
@@ -69,7 +71,7 @@ public class GameActivity extends Activity {
         }
 
         protected void onDraw(Canvas canvas) {
-            canvas.drawColor(Color.WHITE);
+            canvas.drawBitmap(background, 0, 0, null);
             canvas.drawBitmap(fieldBitmap, fieldCoords.x, fieldCoords.y, paint);
             drawField(canvas);
 
@@ -90,14 +92,16 @@ public class GameActivity extends Activity {
             Point coordXY = calculateXY(eventX, eventY, z);
             int x = coordXY.x;
             int y = coordXY.y;
-            if (!game.isAllPiecesSet() && x != -1 && y != -1 && z != -1) {
-                try {
-                    game.makeMove(x, y, z);
-                    invalidate();
-                } catch (RuntimeException e) {}
-            }
-            else if (x != -1 && y != -1 && z != -1) {
-                movePiece(x, y, z);
+            try {
+                if (!game.isAllPiecesSet() && x != -1 && y != -1 && z != -1) {
+                    makeInitiatingMove(x, y, z);
+                    return false;
+                }
+                else if (x != -1 && y != -1 && z != -1) {
+                    movePiece(x, y, z);
+                }
+            } catch (RuntimeException e) {
+                return false;
             }
             return false;
         }
@@ -112,8 +116,10 @@ public class GameActivity extends Activity {
                         if(cells[i][j][k].getStatus().equals(CellStatus.OCCUPIED)) {
                             color = cells[i][j][k].getPiece().getColor();
                             figure = findFigure(i, j, k, color);
-                            if (figure != null)
+                            if (figure != null && !isAllInitialized()) {
+
                                 figure.draw(fieldCanvas);
+                            }
                             if (figure == null && !isAllInitialized())
                                 initializeFigure(fieldCanvas, i, j, k, color);
                             else if (isAllInitialized() && figure != null){
@@ -307,6 +313,21 @@ public class GameActivity extends Activity {
                 }
             }
         }*/
+
+        private void makeInitiatingMove(int x, int y, int z) throws RuntimeException{
+            try {
+                if (game.makeMove(x, y, z)) {
+                    invalidate();
+                }
+                else {
+                    Figure figure = findFigure(x, y, z, game.getActivePlayer());
+                    figure.destroy();
+                    invalidate();
+                }
+            } catch (RuntimeException e) {
+                throw e;
+            }
+        }
     }
 
     class Figure {
@@ -370,6 +391,13 @@ public class GameActivity extends Activity {
             Matrix matrix = new Matrix();
             matrix.preTranslate(x-drawX, y-drawY);
             canvas.drawBitmap(bitmap, matrix, null);
+        }
+
+        public void destroy() {
+            status = PieceStatus.DESTROYED;
+            x = -1;
+            y = -1;
+            z = -1;
         }
 
     }
