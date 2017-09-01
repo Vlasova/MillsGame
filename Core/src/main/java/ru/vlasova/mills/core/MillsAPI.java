@@ -5,7 +5,7 @@ public interface MillsAPI {
     void makeMove( int fromX, int fromY, int fromZ, int toX, int toY, int toZ);
     void removePiece(int x, int y, int z);
     Cell[][][] getField();
-    //boolean isMill();
+    boolean isMill();
     boolean isAllPiecesSet();
-    int getActivePlayer();
+    Player getActivePlayer();
 }

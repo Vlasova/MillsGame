@@ -29,11 +29,12 @@ public class Game implements MillsAPI {
 
     @Override
     public void makeMove(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {
-        if(activePlayer.getStatus().equals(PlayerStatus.BASIC))
+        if (activePlayer.getStatus().equals(PlayerStatus.BASIC))
             board.moveOneCoord(activePlayer.getColor(), fromX, fromY, fromZ, toX, toY, toZ);
-        if(activePlayer.getStatus().equals(PlayerStatus.FINAL))
+        if (activePlayer.getStatus().equals(PlayerStatus.FINAL))
             board.moveAnyCoord(activePlayer.getColor(), fromX, fromY, fromZ, toX, toY, toZ);
-        changeActivePlayer();
+        if (!board.isMill(activePlayer))
+            changeActivePlayer();
     }
 
     @Override
@@ -52,13 +53,13 @@ public class Game implements MillsAPI {
         return board.getCells();
     }
 
-    /**@Override
+    @Override
     public boolean isMill() {
         if(board.isMill(activePlayer))
             return true;
         else
             return false;
-    }*/
+    }
 
     private void changeActivePlayer() {
         if(activePlayer == whitePlayer)
@@ -76,7 +77,7 @@ public class Game implements MillsAPI {
     }
 
     @Override
-    public int getActivePlayer() {
-        return activePlayer.getColor();
+    public Player getActivePlayer() {
+        return activePlayer;
     }
 }

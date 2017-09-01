@@ -7,7 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Point;
-import android.graphics.PorterDuff;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -15,8 +15,7 @@ import android.view.View;
 import android.graphics.Bitmap;
 import android.graphics.Paint;
 import android.view.WindowManager;
-
-import java.util.ArrayList;
+import android.widget.LinearLayout;
 
 import ru.vlasova.mills.core.Cell;
 import ru.vlasova.mills.core.CellStatus;
@@ -29,7 +28,9 @@ public class GameActivity extends Activity {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(new GameView(this));
+
     }
+
 
     class GameView extends View {
         private Bitmap fieldBitmap;
@@ -44,6 +45,7 @@ public class GameActivity extends Activity {
         int xForMove = -1, yForMove = -1, zForMove = -1;
         private Point fieldCoords;
         private int figureSize;
+        LinearLayout linearLayout;
 
         GameView(Context context) {
             super(context);
@@ -61,13 +63,12 @@ public class GameActivity extends Activity {
             game = new Game();
 
             whiteFigures = new Figure[9];
-            blackFigures = new Figure[9];
-            int size = fieldBitmap.getHeight()/9;
+            int size = fieldBitmap.getHeight()/8;
             for (int i=0; i<9; i++) {
-                whiteFigures[i] = new Figure(0, fieldCoords.x+i*size, fieldCoords.y-size, size);
-                blackFigures[i] = new Figure(1, fieldCoords.x+i*size, fieldCoords.y+fieldBitmap.getHeight(), size);
+                whiteFigures[i] = new Figure(0, i*size-5, fieldCoords.y-size, size);
+                blackFigures[i] = new Figure(1, i*size-5, fieldCoords.y+fieldBitmap.getHeight(), size);
             }
-            int figureSize = whiteFigures[0].getBitmap().getHeight();
+
         }
 
         protected void onDraw(Canvas canvas) {
@@ -83,6 +84,7 @@ public class GameActivity extends Activity {
                 if (figure.getStatus().equals(PieceStatus.NEW))
                     figure.draw(canvas);
             }
+            drawDetails(canvas);
         }
 
         public boolean onTouchEvent(MotionEvent event) {
@@ -97,8 +99,12 @@ public class GameActivity extends Activity {
                     makeInitiatingMove(x, y, z);
                     return false;
                 }
-                else if (x != -1 && y != -1 && z != -1) {
+                else if (x != -1 && y != -1 && z != -1 && !game.getActivePlayer().isNewMill()) {
                     movePiece(x, y, z);
+                }
+                else if (x != -1 && y != -1 && z != -1) {
+                    game.removePiece(x, y, z);
+                    invalidate();
                 }
             } catch (RuntimeException e) {
                 return false;
@@ -271,8 +277,11 @@ public class GameActivity extends Activity {
 
         public void movePiece(int x, int y, int z) {
             Figure figure;
-            if (xForMove == -1) {
-                figure = findFigure(x, y, z, game.getActivePlayer());
+            if (game.isMill()) {
+                game.removePiece(x, y, z);
+            }
+            else if (xForMove == -1) {
+                figure = findFigure(x, y, z, game.getActivePlayer().getColor());
                 if (figure != null) {
                     xForMove = x;
                     yForMove = y;
@@ -281,7 +290,7 @@ public class GameActivity extends Activity {
             }
             else {
                 try {
-                    figure = findFigure(xForMove, yForMove, zForMove, game.getActivePlayer());
+                    figure = findFigure(xForMove, yForMove, zForMove, game.getActivePlayer().getColor());
                     figure.setCoords(x, y, z);
 
                     figure.setDrawCoords(calculateCoordAfterMove(x, z)+fieldCoords.x-cellSize/2-10,
@@ -320,13 +329,30 @@ public class GameActivity extends Activity {
                     invalidate();
                 }
                 else {
-                    Figure figure = findFigure(x, y, z, game.getActivePlayer());
+                    Figure figure = findFigure(x, y, z, game.getActivePlayer().getColor());
                     figure.destroy();
                     invalidate();
                 }
             } catch (RuntimeException e) {
                 throw e;
             }
+        }
+
+        private void drawDetails(Canvas canvas) {
+            Paint fontPaint = new Paint();
+            Typeface fontType = Typeface.createFromAsset(getAssets(), "fonts/font.otf");
+            fontPaint.setTypeface(fontType);
+            fontPaint.setColor(Color.WHITE);
+            fontPaint.setTextSize(50);
+            float x = point.x/2-point.x/5;
+            canvas.drawText("ИГРОК 1", x, point.y/8, fontPaint);
+            canvas.drawText("ИГРОК 2", x, point.y-point.y/12, fontPaint);
+
+            int size = point.x/10;
+            Bitmap replay = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.replay), size, size, false);
+            canvas.drawBitmap(replay, point.x-2*size+size/2, size/2, null);
+            Bitmap home = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.home), size, size, false);
+            canvas.drawBitmap(home, size/2, size/2, null);
         }
     }
 
