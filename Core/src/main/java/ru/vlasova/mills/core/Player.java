@@ -8,6 +8,7 @@ public class Player {
     private ArrayList<Piece> pieces;
     private ArrayList<Cell[]> mills;
     private int countOfUsedMills = 0;
+    private int countOfDestroyed = 0;
 
     public Player(int color) {
         status = PlayerStatus.INITIAL;
@@ -42,8 +43,15 @@ public class Player {
 
     public void removePiece(Piece piece) {
         for(Piece p : pieces)
-            if(p.equals(piece))
-                pieces.remove(piece);
+            if(p.getX() == piece.getX() && p.getY() == piece.getY() &&
+                    piece.getZ() == p.getZ() && p.getColor() == piece.getColor() && p.getStatus() == PieceStatus.NEW) {
+                p.setStatus(PieceStatus.DESTROYED);
+                countOfDestroyed++;
+            }
+        if (countOfDestroyed == 6)
+            status = PlayerStatus.FINAL;
+        if (countOfDestroyed == 7)
+            status = PlayerStatus.LOSER;
     }
 
     public void returnMill() {

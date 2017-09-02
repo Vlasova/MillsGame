@@ -1,7 +1,10 @@
 package ru.vlasova.mills.android;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -21,6 +24,7 @@ import ru.vlasova.mills.core.Cell;
 import ru.vlasova.mills.core.CellStatus;
 import ru.vlasova.mills.core.Game;
 import ru.vlasova.mills.core.PieceStatus;
+import ru.vlasova.mills.core.PlayerStatus;
 
 public class GameActivity extends Activity {
 
@@ -28,8 +32,9 @@ public class GameActivity extends Activity {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(new GameView(this));
-
     }
+
+    public void create() {}
 
 
     class GameView extends View {
@@ -63,10 +68,11 @@ public class GameActivity extends Activity {
             game = new Game();
 
             whiteFigures = new Figure[9];
+            blackFigures = new Figure[9];
             int size = fieldBitmap.getHeight()/8;
             for (int i=0; i<9; i++) {
-                whiteFigures[i] = new Figure(0, i*size-5, fieldCoords.y-size, size);
-                blackFigures[i] = new Figure(1, i*size-5, fieldCoords.y+fieldBitmap.getHeight(), size);
+                whiteFigures[i] = new Figure(0, i*size, fieldCoords.y-size, size);
+                blackFigures[i] = new Figure(1, i*size, fieldCoords.y+fieldBitmap.getWidth(), size);
             }
 
         }
@@ -97,18 +103,24 @@ public class GameActivity extends Activity {
             try {
                 if (!game.isAllPiecesSet() && x != -1 && y != -1 && z != -1) {
                     makeInitiatingMove(x, y, z);
-                    return false;
+                    invalidate();
                 }
                 else if (x != -1 && y != -1 && z != -1 && !game.getActivePlayer().isNewMill()) {
                     movePiece(x, y, z);
+                    checkWinner();
                 }
                 else if (x != -1 && y != -1 && z != -1) {
                     game.removePiece(x, y, z);
+                    checkWinner();
                     invalidate();
+
                 }
             } catch (RuntimeException e) {
+                invalidate();
                 return false;
             }
+            if (y == -1)
+                checkButtons(eventX, eventY);
             return false;
         }
 
@@ -251,10 +263,10 @@ public class GameActivity extends Activity {
             double trueX = x - (point.x - fieldBitmap.getWidth())/2;
             double trueY = y - (point.y - fieldBitmap.getHeight())/2;
             int z;
-            if(trueX<=1.5*cellSize || trueX>=12.5*cellSize)
+            if(trueX<=2*cellSize || trueX>=13*cellSize)
                 z = 0;
-            else if((trueX>=2*cellSize && trueX<=4*cellSize && trueY>=2*cellSize && trueY<=11*cellSize)
-                    || (trueX>=10*cellSize && trueX<=12*cellSize && trueY>=2*cellSize && trueY<=11*cellSize))
+            else if((trueX>2*cellSize && trueX<4*cellSize && trueY>=2*cellSize && trueY<=11*cellSize)
+                    || (trueX>10*cellSize && trueX<13*cellSize && trueY>=2*cellSize && trueY<=11*cellSize))
                 z = 1;
             else if((trueX>=4*cellSize && trueX<=6*cellSize && trueY>=5*cellSize && trueY<=9*cellSize)
                     || (trueX>=8*cellSize && trueX<=10*cellSize && trueY>=5*cellSize && trueY<=9*cellSize))
@@ -289,18 +301,16 @@ public class GameActivity extends Activity {
                 }
             }
             else {
-                try {
-                    figure = findFigure(xForMove, yForMove, zForMove, game.getActivePlayer().getColor());
+                figure = findFigure(xForMove, yForMove, zForMove, game.getActivePlayer().getColor());
+                if (game.makeMove(xForMove, yForMove, zForMove, x, y, z)) {
                     figure.setCoords(x, y, z);
-
-                    figure.setDrawCoords(calculateCoordAfterMove(x, z)+fieldCoords.x-cellSize/2-10,
-                            calculateCoordAfterMove(y, z)+fieldCoords.y-cellSize/2-10);
-                    game.makeMove(xForMove, yForMove, zForMove, x, y, z);
-                    xForMove = -1;
-                    yForMove = -1;
-                    zForMove = -1;
+                    figure.setDrawCoords(calculateCoordAfterMove(x, z) + fieldCoords.x - cellSize / 2 - 10,
+                            calculateCoordAfterMove(y, z) + fieldCoords.y - cellSize / 2 - 10);
                     invalidate();
-                } catch (RuntimeException e) {}
+                }
+                xForMove = -1;
+                yForMove = -1;
+                zForMove = -1;
             }
         }
 
@@ -324,23 +334,19 @@ public class GameActivity extends Activity {
         }*/
 
         private void makeInitiatingMove(int x, int y, int z) throws RuntimeException{
-            try {
-                if (game.makeMove(x, y, z)) {
-                    invalidate();
-                }
-                else {
-                    Figure figure = findFigure(x, y, z, game.getActivePlayer().getColor());
-                    figure.destroy();
-                    invalidate();
-                }
-            } catch (RuntimeException e) {
-                throw e;
+            if (game.makeMove(x, y, z)) {
+                invalidate();
+            }
+            else {
+                Figure figure = findFigure(x, y, z, game.getActivePlayer().getColor());
+                figure.destroy();
+                invalidate();
             }
         }
 
         private void drawDetails(Canvas canvas) {
             Paint fontPaint = new Paint();
-            Typeface fontType = Typeface.createFromAsset(getAssets(), "fonts/font.otf");
+            Typeface fontType = Typeface.createFromAsset(getAssets(), "fonts/ButtonFont.otf");
             fontPaint.setTypeface(fontType);
             fontPaint.setColor(Color.WHITE);
             fontPaint.setTextSize(50);
@@ -353,6 +359,27 @@ public class GameActivity extends Activity {
             canvas.drawBitmap(replay, point.x-2*size+size/2, size/2, null);
             Bitmap home = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.home), size, size, false);
             canvas.drawBitmap(home, size/2, size/2, null);
+        }
+
+        private void checkButtons(double x, double y) {
+            int size = point.x/10;
+            if (x > size/2 && x < size/2+size && y > size/2 && y < size/2+size) {
+                Intent intent = new Intent(GameActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
+            int coordX = point.x-2*size+size/2;
+            if (x > coordX & x < coordX+size && y > size/2 && y < size/2+size) {
+                Intent intent = new Intent(GameActivity.this, GameActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        }
+
+        private void checkWinner() {
+            if (game.getActivePlayer().getStatus().equals(PlayerStatus.LOSER)) {
+                finish();
+            }
         }
     }
 

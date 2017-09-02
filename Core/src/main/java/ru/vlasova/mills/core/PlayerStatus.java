@@ -1,5 +1,5 @@
 package ru.vlasova.mills.core;
 
 public enum PlayerStatus {
-    INITIAL, BASIC, FINAL;
+    INITIAL, BASIC, FINAL, LOSER;
 }

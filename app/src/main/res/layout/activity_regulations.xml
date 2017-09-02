@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:background="@drawable/background"
+    android:weightSum="1"
+        >
+    <ScrollView
+        android:id="@+id/scroll"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="7dp"
+        android:scrollbars="none"
+        android:layout_weight="0.9">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/regulations"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="правила"
+                android:textSize="50sp"
+                android:textColor="#f2ea50"
+                android:layout_margin="20dp"
+                />
+
+            <TextView
+                android:id="@+id/text"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textSize="20sp"
+                android:textColor="@android:color/white"
+                android:layout_margin="20dp"
+                />
+        </LinearLayout>
+    </ScrollView>
+    <Button
+        android:id="@+id/back"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
+        android:layout_gravity="left"
+        android:layout_margin="5dp"
+        android:background="@drawable/buttonbackground"
+        android:text="назад"
+        android:textSize="20sp"
+        android:textColor="#301A04"
+        android:layout_weight="0.1"
+        />
+</LinearLayout>

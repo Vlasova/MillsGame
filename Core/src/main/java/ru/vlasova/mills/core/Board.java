@@ -26,6 +26,8 @@ public class Board {
     public void setPiece(Player player, int x, int y, int z) throws RuntimeException{
         if (cells[x][y][z].getStatus().equals(CellStatus.OCCUPIED))
             throw new RuntimeException("Cell is occupied");
+        if (cells[x][y][z].getStatus().equals(CellStatus.NOTAVAILABLE))
+            throw new RuntimeException("The cell is not available");
         Piece piece = new Piece(player.getColor(), x, y, z);
         player.setPiece(piece);
         cells[x][y][z].setPiece(piece);
@@ -61,7 +63,7 @@ public class Board {
         if (cells[fromX][fromY][fromZ].getPiece().getColor() != color)
             throw new RuntimeException("you can`t move opponent`s piece");
         if (cells[toX][toY][toZ].getStatus().equals(CellStatus.EMPTY))
-            cells[toX][toY][toZ].setPiece(cells[fromX][fromY][fromZ].getPiece());
+            cells[toX][toY][toZ].setPiece(cells[fromX][fromY][fromZ].removePiece());
         else
             throw new RuntimeException(("the cell is occupied"));
     }
@@ -163,6 +165,10 @@ public class Board {
     public Piece removePiece(int color, int x, int y, int z) throws RuntimeException {
         if (cells[x][y][z].getPiece().getColor() == color)
             throw new RuntimeException("you can remove only opponent`s piece");
+        if (cells[x][y][z].getStatus().equals(CellStatus.EMPTY))
+            throw new RuntimeException("the cell is empty");
+        if (cells[x][y][z].getStatus().equals(CellStatus.NOTAVAILABLE))
+            throw new RuntimeException("the cell is not available");
         return cells[x][y][z].removePiece();
     }
 }
