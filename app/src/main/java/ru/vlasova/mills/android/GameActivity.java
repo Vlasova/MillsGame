@@ -1,9 +1,7 @@
 package ru.vlasova.mills.android;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -18,7 +16,6 @@ import android.view.View;
 import android.graphics.Bitmap;
 import android.graphics.Paint;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
 
 import ru.vlasova.mills.core.Cell;
 import ru.vlasova.mills.core.CellStatus;
@@ -34,9 +31,6 @@ public class GameActivity extends Activity {
         setContentView(new GameView(this));
     }
 
-    public void create() {}
-
-
     class GameView extends View {
         private Bitmap fieldBitmap;
         private Bitmap background;
@@ -46,11 +40,9 @@ public class GameActivity extends Activity {
         private Point point;
         private Game game;
         private int cellSize;
-        boolean afterRemove;
         int xForMove = -1, yForMove = -1, zForMove = -1;
         private Point fieldCoords;
         private int figureSize;
-        LinearLayout linearLayout;
 
         GameView(Context context) {
             super(context);
@@ -74,7 +66,6 @@ public class GameActivity extends Activity {
                 whiteFigures[i] = new Figure(0, i*size, fieldCoords.y-size, size);
                 blackFigures[i] = new Figure(1, i*size, fieldCoords.y+fieldBitmap.getWidth(), size);
             }
-
         }
 
         protected void onDraw(Canvas canvas) {
@@ -200,35 +191,6 @@ public class GameActivity extends Activity {
             return null;
         }
 
-       /** private void drawFigure(Canvas canvas, int x, int y, int color) {
-            if (color == 0) {
-                for (Figure figure : whiteFigures) {
-                    if (figure.getStatus().equals(PieceStatus.NEW)) {
-                        if (drawFigure(figure, canvas, x, y))
-                            break;
-                    }
-                }
-            }
-            else {
-                for (Figure figure : blackFigures) {
-                    if (figure.getStatus().equals(PieceStatus.NEW)) {
-                        if (drawFigure(figure, canvas, x, y))
-                            break;
-                    }
-                }
-            }
-        }
-
-        private boolean drawFigure(Figure figure, Canvas canvas, int x, int y) {
-            if (figure.getStatus().equals(PieceStatus.NEW)) {
-                figure.setCoords(x, y);
-                figure.setStatus(PieceStatus.INGAME);
-                figure.draw(canvas);
-                return true;
-            }
-            return false;
-        }*/
-
         private int calculateCoordAfterMove(int coord, int z) {
             int trueCoord;
             if(coord==0)
@@ -313,25 +275,6 @@ public class GameActivity extends Activity {
                 zForMove = -1;
             }
         }
-
-        /**public void deleteFigure(int x, int y, int z,int color) {
-            x = calculateCoordAfterMove(x, z);
-            y = calculateCoordAfterMove(y, z);
-            if (color == 0) {
-                for (Figure figure : whiteFigures) {
-                    if (figure.checkCoords(x, y))
-                        figure.delete();
-                    break;
-                }
-            }
-            else {
-                for (Figure figure : blackFigures) {
-                    if (figure.checkCoords(x, y))
-                        figure.delete();
-                    break;
-                }
-            }
-        }*/
 
         private void makeInitiatingMove(int x, int y, int z) throws RuntimeException{
             if (game.makeMove(x, y, z)) {
